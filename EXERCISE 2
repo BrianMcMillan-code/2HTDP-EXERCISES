@@ -1,0 +1,21 @@
+; EXERCISE 2
+
+; QUESTION 2: Add the following two lines to the definitions area:
+
+; (define prefix "hello")
+; (define suffix "world")
+
+; Then use string primitives to create an expression that concatenates prefix and suffix and adds "_" between them. When you run this program, you will see "hello_world" in the interactions area.
+
+(define prefix "hello")
+(define suffix "world")
+
+; To complete this exercise, use in-built function "string-append"; which, consumes two or more strings and concatenates them into one big string.
+
+(string-append prefix "_" suffix)
+
+; Expected output: "hello_world"
+
+(check-expect (string-append prefix "_" suffix) "hello_world")
+
+; The test passed!
