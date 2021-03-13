@@ -1,0 +1,24 @@
+; EXERCISE 3
+
+; Question 3: Add the following two lines to the definitions area:
+
+;(define str "helloworld")
+;(define i 5)
+
+;Then create an expression using string primitives that adds "_" at position i. In general this means the resulting string is longer than the original one; here the expected result is "hello_world".
+;Position means i characters from the left of the string, but programmers start counting at 0. Thus, the 5th letter in this example is "w", because the 0th letter is "h".
+
+(define str "helloworld")
+(define ind "0123456789") ; the index helps us count the expected extracted value.
+(define i 5) 
+
+; Use function (string-ith); which, consumes a string s together with a number i and extracts the 1String located at the ith position (counting from 0).
+
+(string-ith str i)
+
+; Since i = 5, we are extracting from the fifth position of the string (w).
+; Expected output: "w"
+
+(check-expect (string-ith str i) "w")
+
+; The test passed!
