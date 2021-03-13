@@ -1,0 +1,17 @@
+; EXERCISE 4
+
+; QUESTION 4: Use the same setup as in exercise 3 to create an expression that deletes the ith position from str.
+
+(define str "helloworld")
+(define ind "0123456789") ; the index helps us count the expected extracted value.
+(define i 5) 
+
+; Use function (substring) --> Extracts the substring starting at i up to j (or the end if j is not provided).
+
+(string-append (substring str 0 i) (substring str (+ i 1)))
+
+; EXPECTED OUTPUT: "helloorld"
+
+(check-expect (string-append (substring str 0 i) (substring str (+ i 1))) "helloorld")
+
+; The test passed!
