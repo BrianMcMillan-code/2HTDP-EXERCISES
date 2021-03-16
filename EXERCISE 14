@@ -1,1 +1,16 @@
+; Exercise 14:
+; Define the function string-last, which extracts the last 1String from a non-empty string.
 
+; can't use string-ith this time. All strings have a uniform value for its first position, the same
+; can't be said for it's last. ex: Dog (g=3), Bear (r=4)
+
+(define (string-last str)
+  (substring str (- (string-length str) 1)))
+
+; we -1 from the string length and extract said value.
+
+(string-last "ADVENTURE") ;E
+(string-last "nice guys finish last") ;t
+(string-last "Hobbit") ;t
+
+(check-expect (string-last "ADVENTURE") "E")
