@@ -1,0 +1,16 @@
+; QUESTION 11
+
+; EXERCISE 11: define a function that consumes two numbers, x and y,
+; and that computes the distance of point (x,y) to the origin.
+; In exercise 1 you developed the right-hand side of this function
+; for concrete values of x and y. Now add a header.
+
+(define (DIS x y) ; distance to origin
+  (sqrt (+ (* x x) (* y y))))
+
+(DIS 3 4)
+
+; write (DIS x? y?) to get an answer.
+; for (DIS 3 4), expected value is 5.
+
+(check-expect (DIS 3 4) 5) 
