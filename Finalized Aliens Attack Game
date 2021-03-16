@@ -1,0 +1,582 @@
+(define WIDTH 500)
+(define HEIGHT 350)
+(define bigrocket .)
+(define ROCKET-IMG (scale 1/4 bigrocket))
+(define E-SCENE (empty-scene WIDTH HEIGHT 'black))
+(define ROCKET-Y (- HEIGHT (/ (image-height ROCKET-IMG) 2)))
+(define ROCKET-DELTA-X 5)
+(define ALIEN-DELTA-X 5)
+(define ALIEN-DELTA-Y 20)
+
+
+(define bigalien .)
+(define ALIEN-IMG (scale 1/3 bigalien))
+(define SHOT-IMG (square 10 'solid 'red))
+
+(define RIGHT-EDGE (- (sub1 WIDTH) (/ (image-width ALIEN-IMG) 2)))
+(define LEFT-EDGE (/ (image-width ALIEN-IMG) 2))
+(define SHOT-DELTA-Y 8)
+(define SHOT-START-Y (- (sub1 HEIGHT) (image-height ROCKET-IMG)))
+(define ALIEN-WIDTH (image-width ALIEN-IMG))
+(define ALIEN-HEIGHT (image-height ALIEN-IMG))
+
+
+;DATA DEFINITIONS
+
+;A rocket is a positive number, r, such that 0<=r<=WIDTH-1.
+;Example
+(define ROCKET (/ WIDTH 2))
+
+; An alien is a is a posn (make-posn x y)
+; s.t. 0<=x<=WIDTH-1 and 0<=y<=HEIGHT
+; Example
+(define ALIEN (make-posn (/ WIDTH 2) (/ (image-height ALIEN-IMG) 2)))
+                          
+; ; TEMPLATE FOR FNS ON AN ALIEN
+; ; f-on-alien: alien --> ???
+; ; Purpose:
+; (define (f-on-alien an-alien)
+;   ; INVENTORY 
+;   ; (posn-x an-alien) a number for the x-coordinate of an-alien
+;   ; (posn-y an-alien) a number for the y-coordinate of an-alien
+;   ...)
+
+
+; A list of aliens (LOA) is either
+; 1. empty
+; 2. (cons a loa) where a is an alien
+; Example 
+(define INIT-ALIENS (list ALIEN
+                          (make-posn (/ WIDTH 3) (/ (image-height ALIEN-IMG) 2))
+                          (make-posn (* (/ 2 3) WIDTH) (/ (image-height ALIEN-IMG) 2))))
+
+; ; TEMPLATE for FNS on LOA
+; ; fn-on-loa: loa ->
+; ; Purpose:
+; (define (fn-on-loa a-loa)
+;   ; INVENTORY
+;   ; (first a-loa) is the first alien in a-loa
+;   ; (rest a-loa) is a-loa without its first alien
+;   ; (empty? a-loa) returns true is a-loa is empty
+;   ; (fn-on-loa (rest a-loa)) recursively processes a-loa
+;   (cond
+;     [(empty? a-loa) ...]
+;     [else ...(first a-loa)...(fn-on-loa (rest a-loa))])) 
+
+
+; A direction is either "right" "left" or "down"
+(define INIT-DIR "right")
+
+; A shot is only a posn
+
+; Example
+(define SHOT1 (make-posn 50 50))
+
+
+
+; ; TEMPLATE FOR FNS ON A SHOT
+; ; f-on-shot--> ???
+; ; Purpose:
+; (define (f-on-shot)
+;   ; INVENTORY
+;   ; a-shot has to be a posn
+;   ; (posn-x a-shot) is a number for the x-coordinate of a-shot
+;   ; (posn-y a-shot) is a number for the y-coordinate of a-shot
+;   ...)
+
+
+
+; ; template for LOS
+; ; los --> ??
+; ; Purpose:
+;  (define (f-on-los)
+;      ; INVENTORY
+;      ; (first a-los) is the first shot in a list of shots
+;      ; (rest a-los) is the los without the first shot
+;      ; (empty? a-los) returns true if los is empty
+;      ; (fn-on-los (rest-a-los)) recursively process los
+;      (cond
+;        [(empty? a-los) ...]
+;        [else ...(first a-los)...(fn-on-los (rest a-los))]))
+
+;Example
+(define LOS1 empty)
+
+(define LOS2 (list SHOT1))
+  
+
+; A world is a structure, (make-world rocket aliens dir s) where rocket is a rocket and
+; aliens is a list of aliens and shot is a shot
+
+(define-struct world (rocket aliens dir los))
+
+; Example
+(define INIT-WORLD (make-world ROCKET INIT-ALIENS INIT-DIR LOS1))
+
+; ; f-on-world: world-->
+; ; Purpose:
+; (define (f-on-world a-world)
+;   ; INVENTORY
+;   ; (world-rocket a-world) is a rocket
+;   ; (world-aliens a-world) is a list of aliens
+;   ; (world-dir a-world) a string for the direction of the alien 
+;   ; (world-los a-world) is a list of shots in the given world
+;   ...)
+ 
+
+;; DRAWING FUNCTIONS ;;
+ 
+; draw-world: world -> scene
+; Purpose: To draw the world 
+(define (draw-world a-world)
+  (local [
+          ;draw-rocket: rocket -> scene
+          ;Purpose: To draw the given rocket in the given scene
+          (define (draw-rocket a-rocket scn)
+            (place-image ROCKET-IMG a-rocket ROCKET-Y scn))
+
+
+          ; draw-aliens: loa scene -> scene
+          ; Purpose: To draw the aliens
+          (define (draw-aliens a-loa scn)
+            (local [
+                    ; draw-alien: alien scene -> scene
+                    ; Purpose: To draw the given alien in the given file
+                    (define (draw-alien an-alien scn)
+                      ; INVENTORY 
+                      ; (posn-x an-alien) a number for the x-coordinate of an-alien
+                      ; (posn-y an-alien) a number for the y-coordinate of an-alien
+                      (place-image ALIEN-IMG (posn-x an-alien) (posn-y an-alien) scn))
+                    ]
+              ; INVENTORY
+              ; (first a-loa) is the first alien in a-loa
+              ; (rest a-loa) is a-loa without its first alien
+              ; (empty? a-loa) returns true is a-loa is empty
+              ; (fn-on-loa (rest a-loa)) recursively processes a-loa
+              (cond [(empty? a-loa) scn]
+                    [else (draw-alien (first a-loa) (draw-aliens (rest a-loa) scn))])))
+          ; draw-los: los scn --> scn
+          ; Purpose: to draw the los on the given scene
+          (define (draw-los a-los scn)
+            ; INVENTORY
+            ; (first a-los) is the first shot in a list of shots
+            ; (rest a-los) is the los without the first shot
+            ; (empty? a-los) returns true if los is empty
+            ; (draw-los (rest-a-los)) recursively process los
+            (local [; draw-shot: shot scene -> scene
+                    ; Purpose: To draw the shot in the scene 
+                    (define (draw-shot a-shot scn)
+                      ; INVENTORY
+            
+                      ; (posn-x a-shot) is a number for the x-coordinate of a-shot
+                      ; (posn-y a-shot) is a number for the y-coordinate of a-shot
+            
+                      (place-image SHOT-IMG (posn-x a-shot) (posn-y a-shot) scn))]
+              (cond
+                [(empty? a-los) scn]
+                [else (draw-shot (first a-los)(draw-los (rest a-los)scn))])))
+
+          ]
+          
+    ; INVENTORY
+    ; (world-rocket a-world) is a rocket
+    ; (world-aliens a-world) is a loa
+    ; (world-dir a-world) a string for the direction of the alien 
+    ; (world-shot a-world) is either false or a posn for the shot
+    (draw-los (world-los a-world)
+              (draw-aliens (world-aliens a-world) 
+                           (draw-rocket (world-rocket a-world) E-SCENE)))))
+ 
+;; MOVING FUNCTIONS ;;
+
+
+; move-alien: alien direction --> alien
+; Purpose: To move the alien in the game 
+(define (move-alien alien dir)
+  ; INVENTORY
+  ; an-alien is a posn
+  ; (posn-x an-alien) a number for the x-coordinate of an alien
+  ; (posn-y an-alien) a number for the y-coordinate of an alien 
+  (cond [(string=? dir "right") (make-posn (+ (posn-x alien) ALIEN-DELTA-X)
+                                           (posn-y alien))]
+        [(string=? dir "left") (make-posn (- (posn-x alien) ALIEN-DELTA-X)
+                                          (posn-y alien))]
+        [else (make-posn (posn-x alien)
+                         (+ (posn-y alien) ALIEN-DELTA-Y))]))
+
+(check-expect (move-alien ALIEN "right")
+              (make-posn (+ ALIEN-DELTA-X (posn-x ALIEN)) (posn-y ALIEN)))
+(check-expect (move-alien ALIEN "left")
+              (make-posn (- (posn-x ALIEN) ALIEN-DELTA-X) (posn-y ALIEN)))
+(check-expect (move-alien ALIEN "down")
+              (make-posn (posn-x ALIEN)  (+ (posn-y ALIEN) ALIEN-DELTA-Y)))
+
+; move-aliens: loa direction -> loa
+; Purpose: To move the aliens
+(define (move-aliens a-loa dir)
+  ; INVENTORY
+  ; (first a-loa) is the first alien in a-loa
+  ; (rest a-loa) is a-loa without its first alien
+  ; (empty? a-loa) returns true is a-loa is empty
+  ; (fn-on-loa (rest a-loa)) recursively processes a-loa
+  (map (lambda (a) (move-alien a dir)) a-loa))
+
+; move-shot: shot -> shot
+; Purpose: To move the shot 
+(define (move-shot a-shot)
+  ; INVENTORY
+  ; IF a-shot is a posn
+  ; (posn-x a-shot) is a number for the x-coordinate of a-shot
+  ; (posn-y a-shot) is a number for the y-coordinate of a-shot
+  (make-posn (posn-x a-shot) (- (posn-y a-shot) SHOT-DELTA-Y)))
+
+
+             
+
+; move-los --> ??
+; Purpose:
+(define (move-los a-los)
+  ; INVENTORY
+  ; (first a-los) is the first shot in a list of shots
+  ; (rest a-los) is the los without the first shot
+  ; (empty? a-los) returns true if los is empty
+  ; (fn-on-los (rest-a-los)) recursively process los
+  (map move-shot a-los))
+
+
+(check-expect (compute-next-direction (list (make-posn 100 22)) "right") "right")
+(check-expect (compute-next-direction (list (make-posn 100 22)) "left") "left")
+(check-expect (compute-next-direction (list (make-posn (sub1 WIDTH) 22)) "right") "down")
+(check-expect (compute-next-direction (list (make-posn 0 22)) "left") "down")
+(check-expect (compute-next-direction (list (make-posn (sub1 WIDTH) 22)) "down") "left")
+(check-expect (compute-next-direction (list (make-posn 0 22)) "down") "right") 
+
+
+
+
+
+; alien-at-left-edge?: alien -> boolean
+; Purpose: To determine if the alien is at the left edge
+(define (alien-at-left-edge? alien)
+  ; INVENTORY
+  ; (posn-x an-alien) a number for the x of an-alien
+  ; (posn-y an-alien) a number for the y of an-alien
+  (<= (- (posn-x alien) ALIEN-DELTA-X) LEFT-EDGE))
+
+(check-expect (alien-at-left-edge? ALIEN) false)
+(check-expect (alien-at-left-edge? (make-posn 1 100)) true)
+
+
+
+;; KEY PROCESSING ;;
+
+; process-key: world KeyEvent -> world
+; Purpose: To process keyboard input 
+(define (process-key a-world k)
+  ; INVENTORY
+  ; (world-rocket a-world) is a rocket
+  ; (world-aliens a-world) is a loa
+  ; (world-dir a-world) a string for the direction of the alien 
+  ; (world-shot a-world) is either false or a posn for the shot
+  (local[
+         ; compute-los: los rocket -> los
+         ; Purpose: To compute a list of shots 
+         (define (compute-los a-los a-rocket)
+           ; INVENTORY
+           ; IF a-shot is a posn
+           ; (posn-x a-shot) is a number for the x-coordinate of a-shot
+           ; (posn-y a-shot) is a number for the y-coordinate of a-shot
+           (cons (make-posn a-rocket SHOT-START-Y) a-los))
+
+         ;move-rocket: rocket string --> rocket
+         ;Purpose: to move the rocket in the given direction
+         (define (move-rocket a-rocket direction)
+           (cond [(and (string=? direction "right")
+                       (< (+ a-rocket ROCKET-DELTA-X) (- WIDTH 18)))
+                  (+ a-rocket ROCKET-DELTA-X)]
+                 [(and(string=? direction "left")
+                      (> (- a-rocket ROCKET-DELTA-X) 19))
+                  (- a-rocket ROCKET-DELTA-X)]
+                 [else a-rocket]))
+         ]
+    (cond
+      [(key=? k "up")
+       (make-world (world-rocket a-world)
+                   (world-aliens a-world)
+                   (world-dir a-world)
+                   (compute-los (world-los a-world) (world-rocket a-world)))]
+      [else (make-world (move-rocket (world-rocket a-world) k)
+                        (world-aliens a-world)
+                        (world-dir a-world)
+                        (world-los a-world))])))
+
+
+
+;; UPDATING FUNCTIONS  ;; 
+
+
+        
+ 
+
+
+
+
+
+
+
+; create-new-world: world -> world
+; Purpose: To update the world 
+(define (create-new-world a-world)
+  ; INVENTORY
+  ; (world-rocket a-world) is a rocket
+  ; (world-aliens a-world) is a loa
+  ; (world-dir a-world) a string for the direction of the alien 
+  ; (world-los a-world) is either false or a posn for the shot
+  (local[
+         ; remove-hit-aliens: loa los -> a-loa
+         ; Purpose: remove hit aliens lol
+         (define (remove-hit-aliens a-loa a-los)
+           (local [
+                   ; alien-hit-by-any-shot? : alien los > boolean
+                   ; purpose: determine if alien was hit by any of the shots
+                   (define (hit-by-any-shot? a-alien a-los)
+                     
+                     (local [; alien-hit?: alien-shot --> boolean
+                             ; Purpose: To determine if the shot has hit the given alien 
+                             (define (alien-hit? an-alien a-shot)
+                               
+                               ; INVENTORY
+                               ; IF a-shot is a posn
+                               ; (posn-x a-shot) is a number for the x-coordinate of a-shot
+                               ; (posn-y a-shot) is a number for the y-coordinate of a-shot
+                               (and (<= (abs (- (posn-x a-shot) (posn-x an-alien)))
+                                        (/ ALIEN-WIDTH 2))
+                                    (<= (abs (- (posn-y a-shot) (posn-y an-alien)))
+                                        (/ ALIEN-HEIGHT 2))))]
+                       
+                        
+                       ; INVENTORY:
+                       ; (first a-los) -> first shot in a list of shots
+                       ; (rest a-los) -> a list of shots w/out the first shot
+                       ; (empty? a-los) -> returns true if a-los is empty
+                       ; (alien-hit-by-shots? (rest-a-los)) -> recursively processes a-los
+                       (ormap (lambda (a-shot) (alien-hit? a-alien a-shot)) a-los)))
+                   ]
+                        
+
+                    
+             ; INVENTORY
+             ; (first a-los) first shot in a-los
+             ; (rest a-los) a-los w/out the first shot
+             ; (empty? a-los) returns true if a-los is empty
+             ; (fn-on-loa (rest a-los)) recursively processes a-loa
+             (filter (lambda (a) (not (hit-by-any-shot? a a-los))) a-loa)))
+         ; move-aliens : loa-direction -> loa
+         ; purpose : to move the aliens
+         (define (move-aliens a-loa dir)
+           (local [
+                   ; move-alien: alien direction --> alien
+                   ; Purpose: To move the alien in the game 
+                   (define (move-alien alien dir)
+                     ; INVENTORY
+                     ; an-alien is a posn
+                     ; (posn-x an-alien) a number for the x-coordinate of an alien
+                     ; (posn-y an-alien) a number for the y-coordinate of an alien 
+                     (cond [(string=? dir "right") (make-posn (+ (posn-x alien) ALIEN-DELTA-X)
+                                                              (posn-y alien))]
+                           [(string=? dir "left") (make-posn (- (posn-x alien) ALIEN-DELTA-X)
+                                                             (posn-y alien))]
+                           [else (make-posn (posn-x alien)
+                                            (+ (posn-y alien) ALIEN-DELTA-Y))]))
+                   ]
+
+                  
+             ; ; INVENTORY
+             ; (first a-loa) is the first alien in a-loa
+             ; (rest a-loa) is a-loa without its first alien
+             ; (empty? a-loa) returns true is a-loa is empty
+             ; (fn-on-loa (rest a-loa)) recursively processes a-loa
+             (map (lambda (a) (move-alien a-dir)) a-loa)))
+  
+         ; compute next direction : alien direction -> alien
+         ; purpose: determine next direction of alien
+         (define (compute-next-direction a-loa dir )
+           (local [
+          
+                   (define (any-alien-at-left-edge? a-loa)
+                     (local [; any-alien-at-left-edge? : loa -> boolean
+                             ; purpose: you get it
+                    
+                             (define (alien-at-left-edge? alien)
+                               ; INVENTORY
+                               ; (posn-x an-alien) a number for the x of an-alien
+                               ; (posn-y an-alien) a number for the y of an-alien
+                               (<= (- (posn-x alien) ALIEN-DELTA-X) LEFT-EDGE))
+                             ]
+                       (ormap alien-at-left-edge? a-loa)))
+          
+
+                   (define (any-alien-at-right-edge? a-loa)
+                     (local [; alien-at-right-edge?: alien -> boolean
+                             ; Purpose: To determine if the alien is at the right edge
+                             (define (alien-at-right-edge? alien)
+                               ; INVENTORY
+                               ; (posn-x an-alien) a number for the x of an-alien
+                               ; (posn-y an-alien) a number for the y of an-alien
+                               (>= (+ (posn-x alien) ALIEN-DELTA-X) RIGHT-EDGE))]
+                       ; (first a-loa) is the first alien in a-loa
+                       ; (rest a-loa) is a-loa without its first alien
+                       ; (empty? a-loa) returns true is a-loa is empty
+                       ; (fn-on-loa (rest a-loa)) recursively processes a-loa
+                       (ormap alien-at-right-edge? a-loa)))
+
+            
+                   ]
+             ; (first a-loa) is the first alien in a-loa
+             ; (rest a-loa) is a-loa without its first alien
+             ; (empty? a-loa) returns true is a-loa is empty
+             ; (fn-on-loa (rest a-loa)) recursively processes a-loa
+             (cond [(or (and (string=? dir "right") (any-alien-at-right-edge? a-loa))
+                        (and (string=? dir "left") (any-alien-at-left-edge? a-loa)))
+                    "down"]
+                   [(and (string=? dir "down") (any-alien-at-right-edge? a-loa)) "left"]
+                   [(and (string=? dir "down") (any-alien-at-left-edge? a-loa)) "right"]
+                   [else dir])))
+         ;move-shots : los->los
+         ;move-shots : outputs moved los
+         (define move-shots a-los)
+         (local [
+                 ; move-shot: shot -> shot
+                 ; Purpose: To move the shot 
+                 (define (move-shot a-shot)                              
+                   ; INVENTORY
+                   ; IF a-shot is a posn
+                   ; (posn-x a-shot) is a number for the x-coordinate of a-shot
+                   ; (posn-y a-shot) is a number for the y-coordinate of a-shot
+                   (make-posn (posn-x a-shot) (- (posn-y a-shot) SHOT-DELTA-Y)))
+
+
+                   
+                 ]
+
+           ; (first a-loa) is the first alien in a-loa
+           ; (rest a-loa) is a-loa without its first alien
+           ; (empty? a-loa) returns true is a-loa is empty
+           ; (move-shots (rest a-loa)) recursively processes a-los
+           (map move-shot a-los))
+         ;filter-shots: los loa > los
+         ;purpose: make shots disappear upon hitting alien
+         (define (filter-shots a-los a-loa)
+           (local [
+                   ;hit-any-alien? shot-loa -> boolean
+                   ; purpose: determine if shot has hit alien
+                   (define (hit-any-alien? shot a-loa)
+                     (local [
+                             ;alien-hit? : alien-shot>boolean
+                             ;purpose: determine if shot has hit given alien
+                             (define (alien-hit? an-alien a-shot)
+                               ; IF a-shot is a posn
+                               ; (posn-x a-shot) x coordinate of shot
+                               ; (posn-y a-shot) y coordinate of shot
+                               (and (<= (abs (- (posn-x a-shot) (posn-x an-alien)))
+                                        (/ ALIEN-WIDTH 2))
+                                    (<= (abs (- (posn-y a-shot) (posn-y an-alien)))
+                                        (/ ALIEN-HEIGHT 2))))]
+                       ; (first a-los) first shot in los
+                       ; (rest a-los) rest of shots in los
+                       ; (empty a-los) returns true if empty
+                       ; (hit-any-aliens (rest a-los)) recursively processes a-los
+                               
+                       (ormap (lambda (a-alien) (alien-hit? a-alien shot)) a-loa)))]
+             ; (first a-los) first shot in los
+             ; (rest a-los) rest of shots in los
+             ; (empty a-los) returns true if empty
+             ; (filter-shots (rest a-los)) recursively processes a-los
+                               
+             
+             (filter (lambda (a-shot)
+                       (and (positive? (posn-y a-shot))
+                            (not (hit-any-alien? a-shot a-loa)))) a-los)))
+         ]
+
+
+    (make-world
+     (world-rocket a-world)
+     (move-aliens (remove-hit-aliens (world-aliens a-world) (world-shots a-world)) (world-dir a-world))
+     (compute-next-direction (move-aliens (world-aliens a-world) (world-dir a-world))
+                             (world-dir a-world))
+     (move-shots (filter-shots (world-shots a-world) (world-aliens a-world))))
+
+
+    ; we could not get the parentheses right on this function, but that should be the only issue 
+
+
+
+              
+
+    ;; GAME ENDING FUNCTIONS ;; 
+
+
+  
+
+    ; game-over?: world -> boolean
+    ; Purpose: To determine if the simulation should end 
+    (define (game-over? a-world)
+      ; INVENTORY
+      ; (world-rocket a-world) is a rocket
+      ; (world-aliena a-world) is a loa
+      ; (world-dir a-world) a string for the direction of the alien 
+      ; (world-los a-world) list of shits for given world
+      (local [
+              ; any-alien-reached-earth?: loa -> boolean
+              ; Purpose: u get it
+              (define (any-alien-reached-earth? a-loa)
+                ; INVENTORY
+                ; (first a-loa) is the first alien in a-loa
+                ; (rest a-loa) is a-loa without its first alien
+                ; (empty? a-loa) returns true is a-loa is empty
+                ; (fn-on-loa (rest a-loa)) recursively processes a-loa
+                (local [
+                        (define (alien-reached-earth? alien)
+                          ; INVENTORY
+                          ; (posn-x an-alien) a number for the x of an-alien
+                          ; (posn-y an-alien) a number for the y of an-alien
+                          (>= (posn-y alien)
+                              (- (sub1 HEIGHT) (/ (image-height ALIEN-IMG) 2))))]
+  
+                  (ormap alien-reached-earth? a-loa)))
+              ]
+        (or (any-alien-reached-earth? (world-aliens a-world))
+            (= (length (world-aliens a-world)) 0))))
+
+    ; compute-last-scene: world -> scene
+    ; Display ending image 
+    (define (compute-last-scene w)
+      ; INVENTORY
+      ; (world-rocket a-world) is a rocket
+      ; (world-alien a-world) is a loa
+      ; (world-dir a-world) a string for the direction of the alien 
+      ; (world-los a-world) 
+      (cond [(empty? (world-aliens w))
+             (place-image (text "yay!" 36 "green") (/ WIDTH 2) (/ HEIGHT 2) (draw-world w))]
+            [else
+             (place-image (text "oh no!" 36 "red") (/ WIDTH 2) (/ HEIGHT 2) (draw-world w))]))
+
+    ; main: string --> world
+    (define (main n)
+      (big-bang INIT-WORLD
+        (on-draw draw-world)
+        (on-key process-key)
+        (on-tick create-new-world)
+        (stop-when game-over? compute-last-scene)
+        (name n)))
+
+    ;don't localize these
+
+
+
+
+
+
+
+    
