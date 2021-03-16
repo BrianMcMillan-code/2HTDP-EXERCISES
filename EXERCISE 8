@@ -1,0 +1,33 @@
+; QUESTION 8
+
+; EXERCISE 8: Add the following line to the definitions area:
+
+; (define cat past-image-here)
+
+; Create a conditional expression that computes whether the image is tall or wide.
+; An image should be labeled "tall" if its height is larger than or equal to its width;
+; otherwise it is "wide". See exercise 1 for how to create such expressions in DrRacket;
+; as you experiment, replace the cat with a rectangle of your choice to ensure that you know the expected answer.
+; Now try the following modification. Create an expression that computes whether a picture is "tall", "wide", or "square". 
+
+(define past-image-here) ; This is our cat image (I used the one from HTDP textbook)
+
+(if (> (image-height cat) (image-width cat))
+      "TALL"
+      (if (= (image-width cat) (image-height cat))
+          "SQUARE"
+          "WIDE")) ; if the image-height is greater than the image-width, it will return "TALL".
+; if the image-width is equal than the image-height it will return "SQUARE".
+; else, returns "WIDE".
+
+; since the height is greater than the width, the program will return "TALL".
+
+(define IMG (rectangle 30 30 "outline" "pink")) ; This is our second IMG, a Pink Square
+
+(if (> (image-height IMG) (image-width IMG))
+      "TALL"
+      (if (= (image-width IMG) (image-height IMG))
+          "SQUARE"
+          "WIDE"))
+
+; since the height (30), is equal to the width, (30), the program will return "SQUARE".
