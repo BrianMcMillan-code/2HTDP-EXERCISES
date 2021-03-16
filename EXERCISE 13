@@ -1,0 +1,13 @@
+; Exercise 14: Define the function string-first,
+; which extracts the first 1String from a non-empty string. 
+
+(define (string-first str)
+  (string-ith str 0))
+
+; we -1 from the string length and extract said value.
+
+(string-first "helloworld") ;h
+(string-first "WALTER WHITE") ;W
+(string-first "eReN JaEgEr") ;e
+
+(check-expect (string-first "WALTER WHITE") "W")
