@@ -1,0 +1,151 @@
+; 499
+
+;  Design an accumulator-style version of product,
+; the function that computes the product of a list of numbers.
+; Stop when you have formulated the accumulator invariant and have someone check it.
+; The performance of product is O(n) where n is the length of the list.
+; Does the accumulator version improve on this? 
+
+
+; PROD-LON : computes product of a LON
+; PROD-LON : lon -> num
+
+(define (PROD-LON lon)
+  (local (( define (product/a lon a)
+             (cond
+               [(empty? lon) a]
+               [else (product/a (rest lon) (* a (first lon)))])))
+    (product/a lon 1)))
+
+; check-expect
+
+(check-expect (PROD-LON '(1 6 9)) 54)
+(check-expect (PROD-LON '(4 2 0)) 0)
+(check-expect (PROD-LON '(5 1 3 4 5 6 7 8)) 100800)
+
+; 500
+
+;  Design an accumulator-style version of how-many,
+; which is the function that determines the number of items on a list.
+; Stop when you have formulated the invariant and have someone check it.
+; 
+
+
+; how-many : can determine the number of items on a list
+; how-many : list-of-str/num -> number
+
+
+(define (how-many x)
+  (local ((define (how-many/a x a)
+            (cond
+             [(empty? x) a]
+             [else (how-many/a (rest x) (add1 a))])))
+    (how-many/a x 0)))
+
+; check-expect
+
+(check-expect (how-many '( 1 2 3 4 5)) 5)
+(check-expect (how-many '( "yo" "sup" "dawg" "we" "codin" "rn")) 6)
+(check-expect (how-many '( 1 "dog" 2 "cat" 3 "monkey" 4)) 7)
+
+
+; 501
+
+;  Design an accumulator-style version of add-to-pi.
+; The function adds a natural number to pi without using +:
+; ; N -> Number 
+; ; adds n to pi without using +
+; (check-within (add-to-pi 2) (+ 2 pi) 0.001)
+; (define (add-to-pi n)
+;   (cond
+;     [(zero? n) pi]
+;     [else (add1 (add-to-pi (sub1 n)))]))
+;  
+
+
+; Add-to-pi : N -> Number
+; adds n to pi without using +
+
+(define (add-to-pi n)
+  (local ((define (add-to-pi/a n a)
+            (cond
+             [(zero? n) a]
+             [else (add-to-pi/a (sub1 n) (add1 a))])))
+    (add-to-pi/a n pi)))
+
+(check-within (add-to-pi 2) (+ 2 pi) 0.001)
+
+;504
+
+; Design to10.
+; It consumes a list of digits and produces the corresponding number.
+; The first item on the list is the most significant digit.
+; Hence, when applied to '(1 0 2), it produces 102.
+
+
+; to10: LON -> Number
+; consumes a list of digits and produces the corresponding number.
+
+
+(define (to10 lod)
+  (local ((define (to10/a lod a)
+            (cond
+             [(empty? lod) a]
+             [else (to10/a (rest lod) (+ (first lod) (* 10 a)))])))
+    (to10/a lod 0)))
+
+(check-expect (to10 '(1 0 2)) 102)
+(check-expect (to10 '(8 0 8)) 808)
+
+;505
+
+; Design the function is-prime,
+; which consumes a natural number and returns #true
+; if it is prime and #false otherwise.
+
+
+; is-prime: num -> boolean
+; consumes a natural number and returns true if prime and false if else.
+
+(define (is-prime n)
+  (local ((define (is-prime/a n a)
+            (cond
+             [(= a 1) #true]
+             [else (and  (not (zero? (remainder n a)))
+                         (is-prime/a n (sub1 a)))])))
+    (cond
+     [(= n 1) #false]
+     [else (is-prime/a n (sub1 n))])))
+
+; check-expect
+
+(check-expect (is-prime 2) #true)
+(check-expect (is-prime 4) #false)
+
+;506
+
+; Design an accumulator-style version of map.
+; 
+; 
+; procedure
+; 
+; (map f l ...) → (listof Z)
+; 
+;   f : (X ... -> Z)
+;   l : (listof X)
+
+
+; Map-accum : list-of-x -> list-of-y
+; Map-accum : an accumulator-style version of the function, map.
+
+(define (map-accum x y)
+  (local ((define (map-accum/a y a)
+            (cond
+             [(empty? y) (reverse a)]
+             [else (map-accum/a (rest y) (cons (x (first y)) a))])))
+    (map-accum/a y '())))
+
+; check-expect
+
+(check-expect (map-accum add1 '(2 3 4)) '(3 4 5))
+(check-expect (map-accum add1 '(8 9 10)) '(9 10 11))
