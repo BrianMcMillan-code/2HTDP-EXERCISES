@@ -8,6 +8,6 @@
 
 (string-first "helloworld") ;h
 (string-first "WALTER WHITE") ;W
-(string-first "eReN JaEgEr") ;e
 
+(check-expect (string-first "helloworld") "h")
 (check-expect (string-first "WALTER WHITE") "W")
