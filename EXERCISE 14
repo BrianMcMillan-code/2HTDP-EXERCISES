@@ -10,7 +10,7 @@
 ; we -1 from the string length and extract said value.
 
 (string-last "ADVENTURE") ;E
-(string-last "nice guys finish last") ;t
 (string-last "Hobbit") ;t
 
 (check-expect (string-last "ADVENTURE") "E")
+(check-expect (string-last "hobbit") "t")
