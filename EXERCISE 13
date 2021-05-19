@@ -1,5 +1,5 @@
 ; Exercise 14: Define the function string-first,
-; which extracts the first 1String from a non-empty string. 
+; which extracts the first 1String from a non-empty string..
 
 (define (string-first str)
   (string-ith str 0))
