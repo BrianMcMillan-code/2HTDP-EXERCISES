@@ -1,4 +1,4 @@
-; QUESTION 11
+; QUESTION 11.
 
 ; EXERCISE 11: define a function that consumes two numbers, x and y,
 ; and that computes the distance of point (x,y) to the origin.
